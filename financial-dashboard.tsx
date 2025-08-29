@@ -19,23 +19,25 @@ import {
   CreditCard,
   PieChart,
   Activity,
+  ArrowLeft,
+  Edit3,
 } from "lucide-react"
-import { FuturePlanningForm } from "./components/future-planning-form"
+
 import { IndicatorDetailDialog } from "./components/indicator-detail-dialog"
 
 // 修改模擬數據 - 符合用戶要求的案例
 const mockFinancialData = {
   monthlyIncome: 65000, // 月收入
-  monthlyExpense: 58000, // 月支出 (月收入>月支出)
+  monthlyExpense: 58000, // 月支出 (月收支平衡)
   yearlyIncome: 780000, // 年收入
   yearlyExpense: 850000, // 年支出 (年收入<年支出，因為有年終獎金等不規律收入)
   assets: 2200000, // 資產
   liabilities: 1800000, // 負債 (資產>負債)
   passiveIncome: 8000, // 勞保退休金等持續性非工資收入
-  emergencyFund: 120000, // 緊急預備金 (約2個月支出，不足)
+  emergencyFund: 120000, // 準備3-6個月支出總金額做為緊急預備金 (約2個月支出，不足)
   insurance: true, // 有保險
   creditScore: 620, // 信用分數偏低
-  futureExpenses: [], // 沒有未來規劃
+  hasFuturePlanning: false, // 沒有有因應未來財務風險的準備
 }
 
 // 指標詳細說明數據
@@ -52,15 +54,15 @@ const indicatorExplanations = {
         : "負面影響：月度赤字會消耗存款，增加債務負擔，長期將導致財務惡化。",
     suggestion:
       mockFinancialData.monthlyIncome > mockFinancialData.monthlyExpense
-        ? "建議將月盈餘的50%用於緊急預備金，30%用於投資，20%用於償還高利率債務。"
+        ? "建議將月盈餘的50%用於準備3-6個月支出總金額做為緊急預備金，30%用於投資，20%用於償還高利率債務。"
         : "立即檢視支出項目，削減非必要開支，或尋找增加收入的機會。",
-    calculation: "月收入>月支出 = 月收入 - 月支出 = 65,000 - 58,000 = +7,000元",
+    calculation: "月收支平衡 = 月收入 - 月支出 = 65,000 - 58,000 = +7,000元",
   },
   yearlyBalance: {
     status: mockFinancialData.yearlyIncome > mockFinancialData.yearlyExpense ? "達成標準" : "未達標準",
     reason:
       mockFinancialData.yearlyIncome < mockFinancialData.yearlyExpense
-        ? "雖然月收入>月支出，但年支出85萬元超過年收入78萬元，主要因為年度特殊支出（如旅遊、家電更換、醫療費用等）較高。"
+        ? "雖然月收支平衡，但年支出85萬元超過年收入78萬元，主要因為年度特殊支出（如旅遊、家電更換、醫療費用等）較高。"
         : "年收入大於年支出，整體財務狀況穩定。",
     impact:
       mockFinancialData.yearlyIncome < mockFinancialData.yearlyExpense
@@ -70,7 +72,7 @@ const indicatorExplanations = {
       mockFinancialData.yearlyIncome < mockFinancialData.yearlyExpense
         ? "建議設立年度支出預算，將大額支出分散到每月預算中，或尋找增加年收入的機會（如年終獎金、兼職收入）。"
         : "繼續保持良好的年度收支管理，並將盈餘用於長期投資。",
-    calculation: "年收支>年支出 = 年收入 - 年支出 = 780,000 - 850,000 = -70,000元",
+    calculation: "年收支平衡 = 年收入 - 年支出 = 780,000 - 850,000 = -70,000元",
   },
   assetLiability: {
     status: mockFinancialData.assets > mockFinancialData.liabilities ? "達成標準" : "未達標準",
@@ -93,61 +95,61 @@ const indicatorExplanations = {
     reason:
       mockFinancialData.passiveIncome > 0
         ? "您有每月8,000元的勞保退休金等持續性收入，這為未來退休生活提供了基礎保障。"
-        : "您目前沒有被動收入來源，完全依賴工作收入，退休後可能面臨收入中斷的風險。",
+        : "您目前沒有有增加持續性累積非工資收入的能力來源，完全依賴工作收入，退休後可能面臨收入中斷的風險。",
     impact:
       mockFinancialData.passiveIncome > 0
         ? "正向影響：持續性收入提供財務穩定性，減少對工作收入的依賴，有助於退休規劃。"
-        : "負面影響：缺乏被動收入增加財務風險，退休後可能面臨生活品質下降。",
+        : "負面影響：缺乏有增加持續性累積非工資收入的能力增加財務風險，退休後可能面臨生活品質下降。",
     suggestion:
       mockFinancialData.passiveIncome > 0
-        ? "建議繼續增加被動收入來源，如投資股息、租金收入等，目標是退休前達到月支出的70%。"
-        : "立即開始建立被動收入來源，可考慮定期定額投資、購買收租房產等方式。",
-    calculation: "被動收入覆蓋率 = 被動收入 ÷ 月支出 = 8,000 ÷ 58,000 = 13.8%",
+        ? "建議繼續增加有增加持續性累積非工資收入的能力來源，如投資股息、租金收入等，目標是退休前達到月支出的70%。"
+        : "立即開始建立有增加持續性累積非工資收入的能力來源，可考慮定期定額投資、購買收租房產等方式。",
+    calculation: "有增加持續性累積非工資收入的能力覆蓋率 = 有增加持續性累積非工資收入的能力 ÷ 月支出 = 8,000 ÷ 58,000 = 13.8%",
   },
   emergencyFund: {
     status: mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense >= 3 ? "達成標準" : "未達標準",
     reason:
       mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense < 3
-        ? `您的緊急預備金12萬元僅能支撐${Math.round((mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense) * 10) / 10}個月的支出，低於建議的3-6個月標準。`
-        : "您的緊急預備金充足，能夠應對突發的財務需求。",
+        ? `您的準備3-6個月支出總金額做為緊急預備金12萬元僅能支撐${Math.round((mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense) * 10) / 10}個月的支出，低於建議的3-6個月標準。`
+        : "您的準備3-6個月支出總金額做為緊急預備金充足，能夠應對突發的財務需求。",
     impact:
       mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense < 3
-        ? "負面影響：緊急預備金不足可能導致突發狀況時需要借貸或變賣資產，增加財務壓力。"
-        : "正向影響：充足的緊急預備金提供財務安全網，讓您能從容應對突發狀況。",
+        ? "負面影響：準備3-6個月支出總金額做為緊急預備金不足可能導致突發狀況時需要借貸或變賣資產，增加財務壓力。"
+        : "正向影響：充足的準備3-6個月支出總金額做為緊急預備金提供財務安全網，讓您能從容應對突發狀況。",
     suggestion:
       mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense < 3
-        ? `建議立即增加緊急預備金至${(mockFinancialData.monthlyExpense * 3).toLocaleString()}元（3個月支出），可將月盈餘優先用於此目標。`
-        : "維持目前的緊急預備金水準，並定期檢視是否需要調整金額。",
-    calculation: `緊急預備金月數 = 預備金 ÷ 月支出 = 120,000 ÷ 58,000 = ${Math.round((mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense) * 10) / 10}個月`,
+        ? `建議立即增加準備3-6個月支出總金額做為緊急預備金至${(mockFinancialData.monthlyExpense * 3).toLocaleString()}元（3個月支出），可將月盈餘優先用於此目標。`
+        : "維持目前的準備3-6個月支出總金額做為緊急預備金水準，並定期檢視是否需要調整金額。",
+    calculation: `準備3-6個月支出總金額做為緊急預備金月數 = 預備金 ÷ 月支出 = 120,000 ÷ 58,000 = ${Math.round((mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense) * 10) / 10}個月`,
   },
   insurance: {
     status: mockFinancialData.insurance ? "達成標準" : "未達標準",
     reason: mockFinancialData.insurance
       ? "您已購買基本的醫療險和意外險，為健康和意外風險提供了保障。"
-      : "您目前沒有任何保險保障，面臨健康和意外風險時可能造成重大財務損失。",
+      : "您目前沒有任何有基本避險工具，面臨健康和意外風險時可能造成重大財務損失。",
     impact: mockFinancialData.insurance
-      ? "正向影響：保險保障降低了重大疾病或意外事故對財務的衝擊，保護家庭經濟穩定。"
-      : "負面影響：缺乏保險保障可能導致一次重大疾病或意外就摧毀多年的財務積累。",
+      ? "正向影響：有基本避險工具降低了重大疾病或意外事故對財務的衝擊，保護家庭經濟穩定。"
+      : "負面影響：缺乏有基本避險工具可能導致一次重大疾病或意外就摧毀多年的財務積累。",
     suggestion: mockFinancialData.insurance
-      ? "建議檢視保險保障是否充足，考慮增加壽險、失能險等，確保保障額度符合家庭需求。"
+      ? "建議檢視有基本避險工具是否充足，考慮增加壽險、失能險等，確保保障額度符合家庭需求。"
       : "立即購買基本的醫療險和意外險，保障額度建議為年收入的5-10倍。",
-    calculation: mockFinancialData.insurance ? "已有基本保險保障" : "無保險保障",
+    calculation: mockFinancialData.insurance ? "已有基本有基本避險工具" : "無有基本避險工具",
   },
   futurePlanning: {
-    status: mockFinancialData.futureExpenses.length > 0 ? "達成標準" : "未達標準",
+    status: mockFinancialData.hasFuturePlanning ? "達成標準" : "未達標準",
     reason:
-      mockFinancialData.futureExpenses.length === 0
+      !mockFinancialData.hasFuturePlanning
         ? "您目前沒有明確的未來財務規劃，缺乏對重大支出的預先準備。"
         : "您已制定未來財務規劃，對重大支出有預先準備。",
     impact:
-      mockFinancialData.futureExpenses.length === 0
+      !mockFinancialData.hasFuturePlanning
         ? "負面影響：缺乏規劃可能導致面臨重大支出時措手不及，需要緊急借貸或變賣資產。"
         : "正向影響：有計劃的財務規劃有助於提前準備，避免財務壓力。",
     suggestion:
-      mockFinancialData.futureExpenses.length === 0
-        ? "建議立即制定未來5-10年的財務規劃，包括子女教育、購房、退休等重大目標。"
+      !mockFinancialData.hasFuturePlanning
+        ? "建議立即制定未來5-10年的財務規劃，包括子女教育、購房、退休等重大目標。可使用專門的『未來支出試算』工具進行詳細規劃。"
         : "定期檢視和調整財務規劃，確保目標可達成。",
-    calculation: `已規劃項目數量：${mockFinancialData.futureExpenses.length}項`,
+    calculation: mockFinancialData.hasFuturePlanning ? "已有基本規劃準備" : "尚未建立規劃",
   },
   creditScore: {
     status: mockFinancialData.creditScore >= 700 ? "達成標準" : "未達標準",
@@ -179,14 +181,22 @@ export default function FinancialDashboard() {
 
 最近因為信用卡使用率較高，信用分數降到620分。對於未來的財務規劃還沒有具體計畫。`)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [showResults, setShowResults] = useState(true)
+  const [showResults, setShowResults] = useState(false)
+  const [currentPage, setCurrentPage] = useState<'input' | 'results'>('input')
 
   const handleAnalyze = () => {
     setIsAnalyzing(true)
+    setShowResults(false)
     setTimeout(() => {
       setIsAnalyzing(false)
       setShowResults(true)
-    }, 2000)
+      setCurrentPage('results')
+    }, 10000)
+  }
+
+  const handleBackToInput = () => {
+    setCurrentPage('input')
+    setShowResults(false)
   }
 
   // 計算財務健康分數
@@ -205,7 +215,7 @@ export default function FinancialDashboard() {
     const monthlyBuffer = mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense
     if (monthlyBuffer >= 3) score += 25
     if (mockFinancialData.insurance) score += 25
-    if (mockFinancialData.futureExpenses.length > 0) score += 25
+    if (mockFinancialData.hasFuturePlanning) score += 25
     if (mockFinancialData.creditScore >= 700) score += 25
     return score
   }
@@ -213,38 +223,139 @@ export default function FinancialDashboard() {
   const healthScore = calculateHealthScore()
   const safetyScore = calculateSafetyScore()
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* 標題區域 */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-gray-900">財務健康與安全儀表板</h1>
-          <p className="text-lg text-gray-600">透過AI分析您的財務狀況，提供個人化建議</p>
-        </div>
+  // 渲染輸入頁面
+  const renderInputPage = () => (
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* 標題區域 */}
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-bold text-gray-900">財務健康與安全儀表板</h1>
+        <p className="text-lg text-gray-600">透過AI分析您的財務狀況，提供個人化建議</p>
+      </div>
 
-        {/* AI文字分析輸入區 */}
-        <Card className="border-2 border-dashed border-blue-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              AI財務資訊分析
-            </CardTitle>
-            <CardDescription>請輸入您的財務相關資訊，AI將自動識別並分析您的財務狀況</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Textarea
-              placeholder="例如：我每月收入8萬元，支出約6.5萬元，目前有存款150萬，房貸80萬，每月有1.5萬的投資收入..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              className="min-h-[120px]"
-            />
-            <Button onClick={handleAnalyze} disabled={isAnalyzing} className="w-full">
-              {isAnalyzing ? "AI分析中..." : "開始AI分析"}
-            </Button>
+      {/* AI文字分析輸入區 */}
+      <Card className="border-2 border-dashed border-blue-300 mx-auto max-w-4xl">
+        <CardHeader className="text-center pb-6">
+          <CardTitle className="flex items-center justify-center gap-3 text-2xl">
+            <Activity className="h-7 w-7" />
+            AI財務資訊分析
+          </CardTitle>
+          <CardDescription className="text-lg mt-3">
+            請詳細輸入您的財務相關資訊，AI將自動識別並分析您的財務狀況
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6 px-8 pb-8">
+          <Textarea
+            placeholder="請詳細描述您的財務狀況，例如：
+
+我今年45歲，在科技公司擔任主管，每月薪水65,000元。每月固定支出包括房貸25,000元、生活費20,000元、保險費3,000元、其他支出10,000元，總計約58,000元。
+
+去年因為家庭旅遊、家電更換和醫療費用等額外支出，總年支出達到85萬元，超過年收入78萬元。
+
+目前有房產價值180萬、投資帳戶40萬、存款12萬，總資產約220萬。負債方面有房貸餘額150萬、信用卡債30萬，總負債180萬。
+
+我有勞保退休金，預估退休後每月可領8,000元。目前有醫療險和意外險保障。
+
+最近因為信用卡使用率較高，信用分數降到620分。對於未來的財務規劃還沒有具體計畫。"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            className="min-h-[300px] text-base leading-relaxed"
+          />
+          <Button 
+            onClick={handleAnalyze} 
+            disabled={isAnalyzing} 
+            className="w-full h-12 text-lg font-semibold"
+          >
+            {isAnalyzing ? "AI分析中..." : "開始AI分析"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* 讀取動畫 */}
+      {isAnalyzing && (
+        <Card className="border-2 border-blue-300 mx-auto max-w-4xl">
+          <CardContent className="p-8">
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Activity className="h-6 w-6 text-blue-600 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold text-gray-800">AI 正在分析您的財務狀況</h3>
+                <p className="text-gray-600">請稍候，系統正在處理您的資料...</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="flex items-center gap-3 text-blue-700">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm">正在識別收入與支出模式</span>
+                  </div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="flex items-center gap-3 text-green-700">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                    <span className="text-sm">正在評估資產負債狀況</span>
+                  </div>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <div className="flex items-center gap-3 text-purple-700">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+                    <span className="text-sm">正在計算財務健康指標</span>
+                  </div>
+                </div>
+                <div className="bg-orange-50 rounded-lg p-4">
+                  <div className="flex items-center gap-3 text-orange-700">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" style={{animationDelay: '1.5s'}}></div>
+                    <span className="text-sm">正在生成個人化建議</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full animate-pulse"></div>
+              </div>
+            </div>
           </CardContent>
         </Card>
+      )}
+    </div>
+  )
 
-        {showResults && (
+  // 渲染結果頁面
+  const renderResultsPage = () => (
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* 頁面標題與返回按鈕 */}
+      <div className="flex items-center justify-between">
+        <Button 
+          onClick={handleBackToInput}
+          variant="outline" 
+          className="flex items-center gap-2 hover:bg-blue-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          返回修改資料
+        </Button>
+        
+        <div className="text-center flex-1">
+          <h1 className="text-3xl font-bold text-gray-900">財務分析結果</h1>
+          <p className="text-gray-600 mt-1">基於您提供的資訊進行AI智能分析</p>
+        </div>
+        
+        <Button 
+          onClick={handleBackToInput}
+          variant="ghost" 
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+        >
+          <Edit3 className="h-4 w-4" />
+          編輯資料
+        </Button>
+      </div>
+
+      {showResults && (
           <>
             {/* 總覽卡片 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -275,10 +386,10 @@ export default function FinancialDashboard() {
                           ) : (
                             <XCircle className="h-4 w-4 text-red-500" />
                           )}
-                          月收入>月支出
+                          月收支平衡
                         </div>
                         <IndicatorDetailDialog
-                          title="月收入>月支出"
+                          title="月收支平衡"
                           isAchieved={mockFinancialData.monthlyIncome > mockFinancialData.monthlyExpense}
                           currentValue={mockFinancialData.monthlyIncome - mockFinancialData.monthlyExpense}
                           targetValue={0}
@@ -293,10 +404,10 @@ export default function FinancialDashboard() {
                           ) : (
                             <XCircle className="h-4 w-4 text-red-500" />
                           )}
-                          年收支>年支出
+                          年收支平衡
                         </div>
                         <IndicatorDetailDialog
-                          title="年收支>年支出"
+                          title="年收支平衡"
                           isAchieved={mockFinancialData.yearlyIncome > mockFinancialData.yearlyExpense}
                           currentValue={mockFinancialData.yearlyIncome - mockFinancialData.yearlyExpense}
                           targetValue={0}
@@ -329,10 +440,10 @@ export default function FinancialDashboard() {
                           ) : (
                             <XCircle className="h-4 w-4 text-red-500" />
                           )}
-                          被動收入
+                          有增加持續性累積非工資收入的能力
                         </div>
                         <IndicatorDetailDialog
-                          title="被動收入"
+                          title="有增加持續性累積非工資收入的能力"
                           isAchieved={mockFinancialData.passiveIncome > 0}
                           currentValue={mockFinancialData.passiveIncome}
                           targetValue={mockFinancialData.monthlyExpense * 0.3}
@@ -372,10 +483,10 @@ export default function FinancialDashboard() {
                           ) : (
                             <XCircle className="h-4 w-4 text-red-500" />
                           )}
-                          緊急預備金
+                          準備3-6個月支出總金額做為緊急預備金
                         </div>
                         <IndicatorDetailDialog
-                          title="緊急預備金"
+                          title="準備3-6個月支出總金額做為緊急預備金"
                           isAchieved={mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense >= 3}
                           currentValue={mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense}
                           targetValue={3}
@@ -390,10 +501,10 @@ export default function FinancialDashboard() {
                           ) : (
                             <XCircle className="h-4 w-4 text-red-500" />
                           )}
-                          保險保障
+                          有基本避險工具
                         </div>
                         <IndicatorDetailDialog
-                          title="保險保障"
+                          title="有基本避險工具"
                           isAchieved={mockFinancialData.insurance}
                           currentValue={mockFinancialData.insurance ? 1 : 0}
                           targetValue={1}
@@ -403,17 +514,17 @@ export default function FinancialDashboard() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          {mockFinancialData.futureExpenses.length > 0 ? (
+                          {mockFinancialData.hasFuturePlanning ? (
                             <CheckCircle className="h-4 w-4 text-green-500" />
                           ) : (
                             <XCircle className="h-4 w-4 text-red-500" />
                           )}
-                          未來規劃
+                          有因應未來財務風險的準備
                         </div>
                         <IndicatorDetailDialog
                           title="未來財務規劃"
-                          isAchieved={mockFinancialData.futureExpenses.length > 0}
-                          currentValue={mockFinancialData.futureExpenses.length}
+                          isAchieved={mockFinancialData.hasFuturePlanning}
+                          currentValue={mockFinancialData.hasFuturePlanning ? 1 : 0}
                           targetValue={1}
                           unit="項"
                           explanation={indicatorExplanations.futurePlanning}
@@ -426,7 +537,7 @@ export default function FinancialDashboard() {
                           ) : (
                             <XCircle className="h-4 w-4 text-red-500" />
                           )}
-                          信用良好
+                          有家庭支持系統、信用與社會資源
                         </div>
                         <IndicatorDetailDialog
                           title="信用評分"
@@ -445,11 +556,10 @@ export default function FinancialDashboard() {
 
             {/* 詳細分析標籤頁 */}
             <Tabs defaultValue="overview" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="overview">總覽</TabsTrigger>
                 <TabsTrigger value="income-expense">收支分析</TabsTrigger>
                 <TabsTrigger value="assets">資產負債</TabsTrigger>
-                <TabsTrigger value="planning">未來規劃</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-4">
@@ -494,7 +604,7 @@ export default function FinancialDashboard() {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <Shield className="h-4 w-4" />
-                        緊急預備金
+                        準備3-6個月支出總金額做為緊急預備金
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -527,7 +637,7 @@ export default function FinancialDashboard() {
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span>被動收入</span>
+                          <span>有增加持續性累積非工資收入的能力</span>
                           <span className="font-semibold text-green-600">
                             {mockFinancialData.passiveIncome.toLocaleString()}
                           </span>
@@ -641,9 +751,7 @@ export default function FinancialDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="planning" className="space-y-4">
-                <FuturePlanningForm />
-              </TabsContent>
+
             </Tabs>
 
             {/* AI分析結果展示 */}
@@ -688,7 +796,7 @@ export default function FinancialDashboard() {
                     <div className="bg-yellow-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-yellow-800 mb-2">⚠️ 風險因子</h4>
                       <ul className="text-sm text-yellow-700 space-y-1">
-                        <li>• 緊急預備金不足</li>
+                        <li>• 準備3-6個月支出總金額做為緊急預備金不足</li>
                         <li>• 信用分數偏低（620分）</li>
                         <li>• 缺乏未來財務規劃</li>
                         <li>• 年支出超過年收入</li>
@@ -715,14 +823,14 @@ export default function FinancialDashboard() {
                       <li>• 月收支有盈餘，基本財務管理良好</li>
                       <li>• 擁有勞保退休金等持續性收入</li>
                       <li>• 淨資產為正，整體財務結構健康</li>
-                      <li>• 已有基本保險保障</li>
+                      <li>• 已有基本有基本避險工具</li>
                     </ul>
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-red-600">改善重點</h4>
                     <ul className="text-sm space-y-1">
                       <li>• 控制年度額外支出，建立年度預算</li>
-                      <li>• 增加緊急預備金至3個月支出</li>
+                      <li>• 增加準備3-6個月支出總金額做為緊急預備金至3個月支出</li>
                       <li>• 改善信用分數，降低信用卡使用率</li>
                       <li>• 制定未來5-10年財務規劃</li>
                     </ul>
@@ -733,6 +841,11 @@ export default function FinancialDashboard() {
           </>
         )}
       </div>
+    )
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+      {currentPage === 'input' ? renderInputPage() : renderResultsPage()}
     </div>
   )
 }
