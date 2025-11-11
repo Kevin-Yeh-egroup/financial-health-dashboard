@@ -102,9 +102,9 @@ const indicatorExplanations = {
         : "負面影響：缺乏有增加持續性累積非工資收入的能力增加財務風險，退休後可能面臨生活品質下降。",
     suggestion:
       mockFinancialData.passiveIncome > 0
-        ? "建議繼續增加有增加持續性累積非工資收入的能力來源，如投資股息、租金收入等，目標是退休前達到月支出的70%。"
-        : "立即開始建立有增加持續性累積非工資收入的能力來源，可考慮定期定額投資、購買收租房產等方式。",
-    calculation: "有增加持續性累積非工資收入的能力覆蓋率 = 有增加持續性累積非工資收入的能力 ÷ 月支出 = 8,000 ÷ 58,000 = 13.8%",
+        ? "建議繼續增加有增加持續性累積非工資收入的能力來源，如投資股息、租金收入等，目標為月收入的60%。"
+        : "立即開始建立有增加持續性累積非工資收入的能力來源，可考慮定期定額投資、購買收租房產等方式，目標為月收入的60%。",
+    calculation: "有增加持續性累積非工資收入的能力覆蓋率 = 有增加持續性累積非工資收入的能力 ÷ 月收入 = 8,000 ÷ 65,000 = 12.3%",
   },
   emergencyFund: {
     status: mockFinancialData.emergencyFund / mockFinancialData.monthlyExpense >= 3 ? "達成標準" : "未達標準",
@@ -446,7 +446,7 @@ export default function FinancialDashboard() {
                           title="有增加持續性累積非工資收入的能力"
                           isAchieved={mockFinancialData.passiveIncome > 0}
                           currentValue={mockFinancialData.passiveIncome}
-                          targetValue={mockFinancialData.monthlyExpense * 0.3}
+                          targetValue={mockFinancialData.monthlyIncome * 0.6}
                           unit="元/月"
                           explanation={indicatorExplanations.passiveIncome}
                         />
